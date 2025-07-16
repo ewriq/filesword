@@ -33,6 +33,7 @@ func main() {
 	if err := server.Start(); err != nil {
 		panic(err)
 	}
+	
 	err := server.Start()
 	if err != nil {
 		log.Fatal(err)
