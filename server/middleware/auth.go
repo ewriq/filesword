@@ -16,8 +16,7 @@ var (
 
 func Auth(next model.HandlerFunc) model.HandlerFunc {
 	config := utils.LoadConfig("./config.ini")
-	username := config.Username;
-	password := config.Password;
+
 	return func(conn net.Conn, data string) {
 		mu.Lock()
 		auth := authenticatedConns[conn]
@@ -34,7 +33,7 @@ func Auth(next model.HandlerFunc) model.HandlerFunc {
 			user := strings.TrimSpace(parts[0])
 			pass := strings.TrimSpace(parts[1])
 
-			if user != username || pass != password {
+			if user != config.Username || pass != config.Password {
 				conn.Write([]byte("geçersiz giriş\n"))
 				conn.Close()
 				return

@@ -44,8 +44,8 @@
           atimeMs: now.getTime(),
           mtimeMs: now.getTime(),
           fileData: base64Data,
-          username: "adsmin", 
-          password: "1234", 
+          username: "admin", 
+          password: "admin", 
         };
   
         socket.emit("upload-file", meta);
