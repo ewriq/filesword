@@ -41,7 +41,6 @@ func (s *TCPServer) Start() error {
 	if err != nil {
 		return err
 	}
-	defer listener.Close()
 
 	fmt.Println("🚀 Sunucu başlatıldı", s.address, "portunda")
 
@@ -70,7 +69,6 @@ func (s *TCPServer) handleClient(conn net.Conn, addr string) {
 		delete(s.clients, addr)
 		s.mu.Unlock()
 		fmt.Println("🔴 Ayrıldı:", addr)
-		conn.Close()
 	}()
 
 	scanner := bufio.NewScanner(conn)

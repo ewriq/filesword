@@ -29,8 +29,6 @@ function connectTcp() {
   });
 
   tcpClient.on("data", handleTcpData);
-  tcpClient.on("error", () => markTcpDisconnected());
-  tcpClient.on("close", () => markTcpDisconnected());
 }
 
 function setupWebSocket() {
@@ -42,6 +40,6 @@ function setupWebSocket() {
 connectTcp();
 setupWebSocket();
 
-server.listen(4000, () => {
+server.listen(3000, () => {
   console.log("🚀 WebSocket sunucusu 3000 portunda çalışıyor.");
 });
