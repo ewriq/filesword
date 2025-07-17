@@ -3,6 +3,7 @@ package main
 import (
 	"filesword/middleware"
 	"filesword/service"
+	"filesword/utils"
 	"fmt"
 	"log"
 	"net"
@@ -10,13 +11,16 @@ import (
 )
 
 func main() {
-	server := service.NewTCP(":9000")
+	config := utils.LoadConfig("./config.ini")
+	
+	server := service.NewTCP(config.Port)
 
-	server.Use(middleware.LoggerMiddleware)
+	server.Use(middleware.Auth)
+	server.Use(middleware.Logger)
 
 	server.Handle(func(conn net.Conn, data string) {
 		addr := conn.RemoteAddr().String()
-
+		fmt.Printf("📥 Gelen veri: %s\n", data)
 		if strings.HasPrefix(data, "@") {
 			parts := strings.SplitN(data[1:], ":", 2)
 			if len(parts) == 2 {

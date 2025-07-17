@@ -35,16 +35,17 @@
       const reader = new FileReader();
   
       reader.onload = () => {
-        const base64Data = reader.result.split(",")[1]; // data:<mime>;base64,... kısmını ayır
+        const base64Data = reader.result.split(",")[1]; 
         const now = new Date();
-  
-        // Metadata olarak şu bilgileri gönderebiliriz:
+
         const meta = {
           fileName: selectedFile.name,
-          mode: 0o644, // default unix izin (burada stat alamıyoruz tarayıcıda, sabit verdik)
+          mode: 0o644, 
           atimeMs: now.getTime(),
           mtimeMs: now.getTime(),
           fileData: base64Data,
+          username: "adsmin", 
+          password: "1234", 
         };
   
         socket.emit("upload-file", meta);
@@ -55,7 +56,7 @@
         status = "Dosya okunamadı!";
       };
   
-      reader.readAsDataURL(selectedFile); // base64 için DataURL
+      reader.readAsDataURL(selectedFile); 
     }
   </script>
   

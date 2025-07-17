@@ -4,9 +4,13 @@ const socketIo = require("socket.io");
 const net = require("net");
 const fs = require("fs");
 const path = require("path");
+
 const app = express();
 const server = http.createServer(app);
-const io = socketIo(server, { cors: { origin: "*" } });
+const io = socketIo(server, {
+  cors: { origin: "*" },
+  maxHttpBufferSize: 1e9
+});
 
 const TCP_SERVER_HOST = "127.0.0.1";
 const TCP_SERVER_PORT = 9000;
@@ -18,8 +22,10 @@ let buffer = "";
 let currentRequestId = 0;
 const pendingResponses = new Map();
 
-if (!fs.existsSync(FILE_FOLDER)) fs.mkdirSync(FILE_FOLDER);
+const VALID_USERNAME = "admin";
+const VALID_PASSWORD = "1234";
 
+if (!fs.existsSync(FILE_FOLDER)) fs.mkdirSync(FILE_FOLDER);
 
 function connectTcp() {
   tcpClient.connect(TCP_SERVER_PORT, TCP_SERVER_HOST, () => {
@@ -91,7 +97,13 @@ function sendMetaToTcp(meta, socket, tempPath) {
 }
 
 function handleFileUpload(socket, payload) {
-  const { fileName, mode, atimeMs, mtimeMs, fileData } = payload;
+  const { username, password, fileName, mode, atimeMs, mtimeMs, fileData } = payload;
+
+  if (username !== VALID_USERNAME || password !== VALID_PASSWORD) {
+    socket.emit("upload-error", "giriş reddedildi");
+    return;
+  }
+
   if (!fileName || !fileData) {
     socket.emit("upload-error", "eksik veri");
     return;
