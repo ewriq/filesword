@@ -1,45 +1,71 @@
 const express = require("express");
 const http = require("http");
 const socketIo = require("socket.io");
-const net = require("net");
-
-const {
-  handleTcpData,
-  setTcpSocket,
-  markTcpDisconnected,
-  handleFileUpload, 
-} = require("./handler/handler");
+const path = require("path");
+const fs = require("fs");
+const cors = require("cors");
 
 const app = express();
 const server = http.createServer(app);
+
 const io = socketIo(server, {
-  cors: { origin: "*" },
   maxHttpBufferSize: 1e9,
+  cors: {
+    origin: "http://localhost:5173",      
+        methods: ["GET", "POST", "DELETE", "PUT"],
+    credentials: true
+  }
 });
 
-const TCP_SERVER_HOST = "127.0.0.1";
-const TCP_SERVER_PORT = 9000;
 
-const tcpClient = new net.Socket();
+const websocket = require("./app/init");
 
-function connectTcp() {
-  tcpClient.connect(TCP_SERVER_PORT, TCP_SERVER_HOST, () => {
-    setTcpSocket(tcpClient);
-    console.log("✅ TCP bağlantısı kuruldu.");
+const PORT = 4000;
+
+app.use(cors({
+  origin: "http://localhost:5173",
+  methods: ["GET", "POST", "DELETE"],
+  credentials: true
+}));
+
+app.use('/files', express.static(path.join(__dirname, './app/snap')));
+
+app.get('/file', (req, res) => {
+  fs.readdir(path.join(__dirname, './app/snap'), (err, files) => {
+    if (err) {
+      return res.status(500).json({ error: 'Snap klasörü okunamadı' });
+    }
+    res.json(files);
   });
+});
 
-  tcpClient.on("data", handleTcpData);
-}
+app.delete("/file", (req, res) => {
+  const fileName = req.query.name;
+  if (!fileName) {
+    return res.status(400).json({ error: "Dosya adı belirtilmeli" });
+  }
 
-function setupWebSocket() {
-  io.on("connection", (socket) => {
-    socket.on("upload-file", (payload) => handleFileUpload(socket, payload));
+  const filePath = path.join(path.join(__dirname, './app/snap'), fileName);
+
+  fs.access(filePath, fs.constants.F_OK, (err) => {
+    if (err) {
+      return res.status(404).json({ error: "Dosya bulunamadı" });
+    }
+
+
+    fs.unlink(filePath, (err) => {
+      if (err) {
+        return res.status(500).json({ error: "Dosya silinemedi" });
+      }
+
+      res.json({ message: "Dosya başarıyla silindi" });
+    });
   });
-}
+});
 
-connectTcp();
-setupWebSocket();
+websocket.connectTcp();
+websocket.setupWebSocket(io);
 
-server.listen(3000, () => {
-  console.log("🚀 WebSocket sunucusu 3000 portunda çalışıyor.");
+server.listen(PORT, () => {
+  console.log(`🚀 Sunucu ${PORT} portunda çalışıyor.`);
 });

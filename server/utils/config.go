@@ -7,7 +7,6 @@ import (
 
 type ConfigList struct {
 	Port     			string
-	Database 			string
 	Username 			string
 	Password 			string
 }
@@ -23,7 +22,6 @@ func LoadConfig(path string) ConfigList {
 	
 	Config := ConfigList{
 		Port:     			cfg.Section("server").Key("port").MustString(":9000"),
-		Database: 			cfg.Section("db").Key("dsn").String(),
 		Username: 			cfg.Section("server").Key("username").String(),
 		Password: 			cfg.Section("server").Key("password").String(),
 	}

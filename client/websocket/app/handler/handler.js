@@ -1,7 +1,7 @@
 const net = require("net");
 const fs = require("fs");
 const path = require("path");
-const { FILE_FOLDER  } = require("./shared");
+const { FILE_FOLDER, VALID_USERNAME, VALID_PASSWORD } = require("./shared");
 
 let tcpBuffer = ""; 
 let currentRequestId = 0;
@@ -50,6 +50,10 @@ function sendMetaToTcp(meta, socket, tempPath) {
 function handleFileUpload(socket, payload) {
   const { username, password, fileName, mode, atimeMs, mtimeMs, fileData } = payload;
 
+  if (username !== VALID_USERNAME || password !== VALID_PASSWORD) {
+    socket.emit("upload-error", "giriş reddedildi");
+    return;
+  }
 
   if (!fileName || !fileData) {
     socket.emit("upload-error", "eksik veri");
@@ -57,7 +61,7 @@ function handleFileUpload(socket, payload) {
   }
 
   const buffer = Buffer.from(fileData, "base64");
-  const tempPath = path.join(FILE_FOLDER, "temp_" + fileName);
+  const tempPath = path.join(FILE_FOLDER,  fileName);
   fs.writeFileSync(tempPath, buffer);
 
   const meta = { fileName, mode, atimeMs, mtimeMs };
@@ -68,7 +72,6 @@ function handleFileUpload(socket, payload) {
 function handleTcpData(data) {
   tcpBuffer += data.toString();
   const parts = tcpBuffer.split("\n");
-console.log(parts);
 
   while (parts.length > 1) {
     const raw = parts.shift();

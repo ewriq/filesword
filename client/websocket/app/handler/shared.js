@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const FILE_FOLDER = path.join(__dirname, "..", "file");
+const FILE_FOLDER = path.join(__dirname, "..", "snap");
 const VALID_USERNAME = "admin";
 const VALID_PASSWORD = "admin";
 
